@@ -8,13 +8,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const matchBtn = document.getElementById('match-btn');
     const mismatchBtn = document.getElementById('mismatch-btn');
     const stopBtn = document.getElementById('stop-btn');
-    const trialCounter = document.getElementById('trial-counter');
+    const progressBar = document.getElementById('progress-bar');
+    const scoreDisplay = document.getElementById('score-display');
 
     // Game State Variables
     const gridSize = 12;
     let sequence = [];
     let userResponses = [];
-    let evaluatedSteps = []; // To prevent double-counting scores
+    let evaluatedSteps = [];
     let gameInterval;
     let currentIndex = 0;
     let score = 0;
@@ -58,15 +59,16 @@ document.addEventListener('DOMContentLoaded', () => {
         gameRunning = true;
         n = nToggleCheckbox.checked ? 3 : 2;
         sequence = [];
-        userResponses = Array(totalSteps).fill(null); // null: no response, true: match, false: mismatch
+        userResponses = Array(totalSteps).fill(null);
         evaluatedSteps = Array(totalSteps).fill(false);
         currentIndex = 0;
         score = 0;
 
-        scoreSpan.textContent = '0';
-        trialCounter.textContent = `0/${totalSteps}`;
+        scoreDisplay.classList.add('hidden');
         messageP.textContent = '게임 시작! 집중하세요.';
         messageP.style.color = 'black';
+        progressBar.style.width = '0%';
+        
         startBtn.disabled = true;
         nToggleCheckbox.disabled = true;
         matchBtn.disabled = false;
@@ -106,16 +108,16 @@ document.addEventListener('DOMContentLoaded', () => {
         gridItems.forEach(item => item.classList.remove('active'));
         const currentPosition = sequence[currentIndex];
         gridItems[currentPosition].classList.add('active');
-
+        
         currentIndex++;
-        trialCounter.textContent = `${currentIndex}/${totalSteps}`;
-        scoreSpan.textContent = score;
+        const progressPercentage = (currentIndex / totalSteps) * 100;
+        progressBar.style.width = `${progressPercentage}%`;
     }
 
     function handleUserResponse(response) {
         if (!gameRunning || currentIndex === 0) return;
         userResponses[currentIndex - 1] = response;
-
+        
         const btn = response ? matchBtn : mismatchBtn;
         btn.style.backgroundColor = '#ffc107'; // Highlight button on click
         setTimeout(() => {
@@ -124,16 +126,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function evaluateResponse(stepIndex) {
-        if (evaluatedSteps[stepIndex]) return;
+        if (evaluatedSteps[stepIndex] || stepIndex < n) return;
 
-        const isMatch = stepIndex >= n && sequence[stepIndex] === sequence[stepIndex - n];
+        const isMatch = sequence[stepIndex] === sequence[stepIndex - n];
         const userResponse = userResponses[stepIndex];
 
-        // Correct if user identified the state correctly, or if user correctly identified no-match (by not responding)
         if ((isMatch && userResponse === true) || (!isMatch && userResponse === false)) {
             score++;
         }
-
+        
         evaluatedSteps[stepIndex] = true;
     }
 
@@ -143,9 +144,11 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(gameInterval);
         gameRunning = false;
 
-        // Ensure the last step is evaluated
-        if (currentIndex > 0 && !evaluatedSteps[currentIndex - 1]) {
-            evaluateResponse(currentIndex - 1);
+        // Evaluate all remaining steps
+        for (let i = n; i < currentIndex; i++) {
+            if (!evaluatedSteps[i]) {
+                evaluateResponse(i);
+            }
         }
 
         startBtn.disabled = false;
@@ -155,9 +158,11 @@ document.addEventListener('DOMContentLoaded', () => {
         stopBtn.disabled = true;
         gridItems.forEach(item => item.classList.remove('active'));
 
-        const finalMessage = `게임 종료! ${totalSteps}번 중 ${score}개를 맞췄습니다.`;
+        const scorableTrials = totalSteps - n;
+        const finalMessage = `게임 종료! ${scorableTrials}번 중 ${score}개를 맞췄습니다.`;
         messageP.textContent = finalMessage;
         messageP.style.color = 'black';
-        scoreSpan.textContent = score; // Final score
+        scoreSpan.textContent = score;
+        scoreDisplay.classList.remove('hidden');
     }
 });
