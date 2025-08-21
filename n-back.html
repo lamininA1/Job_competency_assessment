@@ -23,9 +23,14 @@
         <div id="grid-container" class="grid-container"></div>
         <div class="feedback">
             <p>점수: <span id="score">0</span></p>
+            <p>진행: <span id="trial-counter">0/40</span></p>
             <p id="message"></p>
         </div>
-        <button id="match-btn">일치</button>
+        <div class="action-buttons">
+            <button id="match-btn">일치</button>
+            <button id="mismatch-btn">불일치</button>
+        </div>
+        <button id="stop-btn" class="stop-button">중단</button>
     </div>
     <script src="script.js"></script>
 </body>
