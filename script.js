@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         messageP.textContent = '게임 시작! 집중하세요.';
         messageP.style.color = 'black';
         progressBar.style.width = '0%';
-
+        
         startBtn.disabled = true;
         nToggleCheckbox.disabled = true;
         matchBtn.disabled = false;
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gridItems.forEach(item => item.classList.remove('active'));
         const currentPosition = sequence[currentIndex];
         gridItems[currentPosition].classList.add('active');
-
+        
         currentIndex++;
         const progressPercentage = (currentIndex / totalSteps) * 100;
         progressBar.style.width = `${progressPercentage}%`;
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleUserResponse(response) {
         if (!gameRunning || currentIndex === 0) return;
         userResponses[currentIndex - 1] = response;
-
+        
         const btn = response ? matchBtn : mismatchBtn;
         btn.style.backgroundColor = '#ffc107'; // Highlight button on click
         setTimeout(() => {
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if ((isMatch && userResponse === true) || (!isMatch && userResponse === false)) {
             score++;
         }
-
+        
         evaluatedSteps[stepIndex] = true;
     }
 
