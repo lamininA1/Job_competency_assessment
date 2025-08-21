@@ -71,8 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         startBtn.disabled = true;
         nToggleCheckbox.disabled = true;
-        matchBtn.disabled = false;
-        mismatchBtn.disabled = false;
+        matchBtn.disabled = true; // Initially disable
+        mismatchBtn.disabled = true; // Initially disable
         stopBtn.disabled = false;
 
         generateSequence();
@@ -108,6 +108,16 @@ document.addEventListener('DOMContentLoaded', () => {
         gridItems.forEach(item => item.classList.remove('active'));
         const currentPosition = sequence[currentIndex];
         gridItems[currentPosition].classList.add('active');
+
+        if (currentIndex >= n) {
+            matchBtn.disabled = false;
+            mismatchBtn.disabled = false;
+            if (currentIndex === n) {
+                messageP.textContent = '이제부터 응답하세요!';
+            }
+        } else {
+            messageP.textContent = `${n}턴 이후에 시작됩니다... ${currentIndex + 1}/${n}`;
+        }
         
         currentIndex++;
         const progressPercentage = (currentIndex / totalSteps) * 100;
