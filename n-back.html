@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N-Back 검사</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>N-Back 검사</h1>
+        <div class="controls">
+            <div class="n-toggle-container">
+                <span class="toggle-label">2-BACK</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="n-toggle-checkbox">
+                    <span class="slider"></span>
+                </label>
+                <span class="toggle-label">3-BACK</span>
+            </div>
+            <button id="start-btn">시작</button>
+        </div>
+        <div id="grid-container" class="grid-container"></div>
+        <div class="feedback">
+            <p>점수: <span id="score">0</span></p>
+            <p id="message"></p>
+        </div>
+        <button id="match-btn">일치</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
