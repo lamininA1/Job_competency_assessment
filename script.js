@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const scoreSpan = document.getElementById('score');
     const messageP = document.getElementById('message');
     const matchBtn = document.getElementById('match-btn');
+    const mismatchBtn = document.getElementById('mismatch-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const trialCounter = document.getElementById('trial-counter');
 
     // Game State Variables
     const gridSize = 12;
@@ -31,14 +34,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event Listeners
     startBtn.addEventListener('click', startGame);
     matchBtn.addEventListener('click', () => handleUserResponse(true));
+    mismatchBtn.addEventListener('click', () => handleUserResponse(false));
+    stopBtn.addEventListener('click', endGame);
+
     document.addEventListener('keydown', (e) => {
-        if (e.code === 'Space' && gameRunning && !matchBtn.disabled) {
+        if (!gameRunning || matchBtn.disabled) return;
+        if (e.code === 'ArrowLeft') {
             e.preventDefault();
-            handleUserResponse(true);
+            handleUserResponse(true); // Match
+        } else if (e.code === 'ArrowRight') {
+            e.preventDefault();
+            handleUserResponse(false); // Mismatch
         }
     });
 
     matchBtn.disabled = true;
+    mismatchBtn.disabled = true;
+    stopBtn.disabled = true;
 
     function startGame() {
         if (gameRunning) return;
@@ -46,17 +58,20 @@ document.addEventListener('DOMContentLoaded', () => {
         gameRunning = true;
         n = nToggleCheckbox.checked ? 3 : 2;
         sequence = [];
-        userResponses = Array(totalSteps).fill(false);
-        evaluatedSteps = Array(totalSteps).fill(false); // Reset evaluated steps
+        userResponses = Array(totalSteps).fill(null); // null: no response, true: match, false: mismatch
+        evaluatedSteps = Array(totalSteps).fill(false);
         currentIndex = 0;
         score = 0;
 
         scoreSpan.textContent = '0';
+        trialCounter.textContent = `0/${totalSteps}`;
         messageP.textContent = '게임 시작! 집중하세요.';
         messageP.style.color = 'black';
         startBtn.disabled = true;
         nToggleCheckbox.disabled = true;
         matchBtn.disabled = false;
+        mismatchBtn.disabled = false;
+        stopBtn.disabled = false;
 
         generateSequence();
         setTimeout(() => {
@@ -91,46 +106,58 @@ document.addEventListener('DOMContentLoaded', () => {
         gridItems.forEach(item => item.classList.remove('active'));
         const currentPosition = sequence[currentIndex];
         gridItems[currentPosition].classList.add('active');
+
         currentIndex++;
+        trialCounter.textContent = `${currentIndex}/${totalSteps}`;
+        scoreSpan.textContent = score;
     }
 
     function handleUserResponse(response) {
         if (!gameRunning || currentIndex === 0) return;
         userResponses[currentIndex - 1] = response;
-        matchBtn.style.backgroundColor = '#ffc107';
+
+        const btn = response ? matchBtn : mismatchBtn;
+        btn.style.backgroundColor = '#ffc107'; // Highlight button on click
         setTimeout(() => {
-            matchBtn.style.backgroundColor = '#007bff';
+            btn.style.backgroundColor = response ? '#007bff' : '#6c757d';
         }, 200);
     }
 
     function evaluateResponse(stepIndex) {
-        if (evaluatedSteps[stepIndex]) return; // Prevent double-counting
+        if (evaluatedSteps[stepIndex]) return;
 
         const isMatch = stepIndex >= n && sequence[stepIndex] === sequence[stepIndex - n];
-        const userClickedMatch = userResponses[stepIndex];
+        const userResponse = userResponses[stepIndex];
 
-        if ((isMatch && userClickedMatch) || (!isMatch && !userClickedMatch)) {
+        // Correct if user identified the state correctly, or if user correctly identified no-match (by not responding)
+        if ((isMatch && userResponse === true) || (!isMatch && userResponse === false)) {
             score++;
         }
-        evaluatedSteps[stepIndex] = true; // Mark this step as evaluated
+
+        evaluatedSteps[stepIndex] = true;
     }
 
     function endGame() {
+        if (!gameRunning) return;
+
         clearInterval(gameInterval);
         gameRunning = false;
 
-        // Explicitly evaluate the final step to fix the review issue
-        evaluateResponse(totalSteps - 1);
+        // Ensure the last step is evaluated
+        if (currentIndex > 0 && !evaluatedSteps[currentIndex - 1]) {
+            evaluateResponse(currentIndex - 1);
+        }
 
         startBtn.disabled = false;
         nToggleCheckbox.disabled = false;
         matchBtn.disabled = true;
+        mismatchBtn.disabled = true;
+        stopBtn.disabled = true;
         gridItems.forEach(item => item.classList.remove('active'));
 
-        const mistakes = totalSteps - score;
-        const finalMessage = `게임 종료! ${totalSteps}번 중 ${mistakes}개 틀렸습니다.`;
+        const finalMessage = `게임 종료! ${totalSteps}번 중 ${score}개를 맞췄습니다.`;
         messageP.textContent = finalMessage;
         messageP.style.color = 'black';
-        scoreSpan.textContent = '0';
+        scoreSpan.textContent = score; // Final score
     }
 });
