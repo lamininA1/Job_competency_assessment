@@ -44,11 +44,27 @@ h1 {
 }
 
 .grid-item.active {
-    background-color: #ffcc00;
+    background-color: #007bff;
 }
 
 .feedback {
     margin-bottom: 20px;
+}
+
+.action-buttons {
+    margin-bottom: 20px;
+}
+
+.action-buttons button {
+    margin: 0 10px;
+}
+
+.stop-button {
+    background-color: #dc3545;
+}
+
+.stop-button:hover {
+    background-color: #c82333;
 }
 
 button {
